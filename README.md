@@ -28,3 +28,8 @@ cd ./app
 
 streamlit run app.py --server.port 20000
 ```
+
+### 테스트용 EC2 주소
+```
+http://13.209.16.128:20000/
+```
