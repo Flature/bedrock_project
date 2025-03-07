@@ -14,7 +14,7 @@ class BedrockService:
             service_name='bedrock-runtime',
             region_name='ap-northeast-2'
         )
-        self.model_id = 'anthropic.claude-3-5-sonnet-20241022-v2:0'
+        self.model_id = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
 # 모델 호출
 ## Bedrock 모델 호출
