@@ -7,7 +7,6 @@ import pandas as pd
 class BedrockService:
 # 클래스 초기화
 ## AWS Bedrock 서비스 클라이언트 초기화
-## us-east-1 리전 사용 (리전은 oregon으로 설정했습니다)
 ## Claude 3 Sonnet 을 기본 모델로 설정 (변경 필요하면 시도해보셔도 좋습니다)
 
     def __init__(self):
@@ -15,7 +14,7 @@ class BedrockService:
             service_name='bedrock-runtime',
             region_name='ap-northeast-2'
         )
-        self.model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        self.model_id = 'anthropic.claude-3-5-sonnet-20241022-v2:0'
 
 # 모델 호출
 ## Bedrock 모델 호출
