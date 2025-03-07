@@ -60,18 +60,9 @@ with tab1:
             try:
                 # DataFrame을 dict로 변환
                 resources_df = fetch_aws_resources()
-                cost_analysis = fetch_cost_analysis()
 
                 context = {
-                    'resources': resources_df.to_dict(orient='records') if not resources_df.empty else [],
-                    'cost_data': {
-                        'service_costs': cost_analysis['service_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'service_costs' in cost_analysis else [],
-                        'region_costs': cost_analysis['region_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'region_costs' in cost_analysis else [],
-                        'daily_costs': cost_analysis['daily_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'daily_costs' in cost_analysis else []
-                    } if cost_analysis else {}
+                    'resources': resources_df.to_dict(orient='records') if not resources_df.empty else []
                 }
 
                 # 컨텍스트 데이터 로깅
