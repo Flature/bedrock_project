@@ -14,13 +14,13 @@ import plotly.express as px
 class AWSResourceCollector:
     def __init__(self):
         print("Initializing AWSResourceCollector")
-        self.cloudwatch = boto3.client('cloudwatch')
-        self.ec2 = boto3.client('ec2')
-        self.rds = boto3.client('rds')
-        self.lambda_client = boto3.client('lambda')
-        self.s3 = boto3.client('s3')
-        self.ce = boto3.client(
-            'ce')  # Cost Explorer 클라이언트 추가, https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ce.html
+        self.cloudwatch = boto3.client('cloudwatch', 'ap-northeast-2')
+        self.ec2 = boto3.client('ec2', 'ap-northeast-2')
+        self.rds = boto3.client('rds', 'ap-northeast-2')
+        self.lambda_client = boto3.client('lambda', 'ap-northeast-2')
+        self.s3 = boto3.client('s3', 'ap-northeast-2')
+        self.ce = boto3.client('ce', 'ap-northeast-2')
+
 
         self.service_mapping = {
             'EC2': 'Amazon Elastic Compute Cloud - Compute',
@@ -34,7 +34,7 @@ class AWSResourceCollector:
             self.regions = [region['RegionName'] for region in self.ec2.describe_regions()['Regions']]
         except Exception as e:
             print(f"Error getting regions: {str(e)}")
-            self.regions = ['us-east-1', 'us-west-2', 'ap-northeast-2']  # 기본 리전
+            self.regions = ['ap-northeast-2']  # 기본 리전
 
         print("AWSResourceCollector initialized")
 
