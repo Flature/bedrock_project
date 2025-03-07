@@ -20,7 +20,7 @@ class BedrockService:
         )
         self.model_id = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
         self.bedrock_agent = boto3.client(
-            service_name='agent-hcc-supervisor',
+            service_name='bedrock-agent',
             region_name='ap-northeast-2'
         )
 
