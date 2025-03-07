@@ -17,16 +17,10 @@ class AWSResourceCollector:
         self.cloudwatch = boto3.client('cloudwatch', 'ap-northeast-2')
         self.ec2 = boto3.client('ec2', 'ap-northeast-2')
         self.rds = boto3.client('rds', 'ap-northeast-2')
-        self.lambda_client = boto3.client('lambda', 'ap-northeast-2')
-        self.s3 = boto3.client('s3', 'ap-northeast-2')
-        self.ce = boto3.client('ce', 'ap-northeast-2')
-
 
         self.service_mapping = {
             'EC2': 'Amazon Elastic Compute Cloud - Compute',
             'RDS': 'Amazon Relational Database Service',
-            'Lambda': 'AWS Lambda',
-            'S3': 'Amazon Simple Storage Service'
         }
 
         # 모든 리전 목록 가져오기
@@ -416,9 +410,7 @@ class AWSResourceCollector:
         dfs = []
         collection_methods = [
             self.collect_ec2_data,
-            self.collect_rds_data,
-            self.collect_lambda_data,
-            self.collect_s3_data
+            self.collect_rds_data
         ]
 
         # 병렬로 데이터 수집
