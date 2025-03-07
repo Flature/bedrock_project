@@ -5,6 +5,7 @@ import pandas as pd
 
 from aws_services import AWSResourceCollector
 from bedrock_utils import BedrockService
+from agent_lib import get_agent_response
 
 # 디버그 모드 설정
 DEBUG = True
@@ -25,7 +26,6 @@ def fetch_aws_resources():
     collector = AWSResourceCollector()
     resources = collector.collect_all_resources()
     return resources
-
 
 
 def debug_print(message):
@@ -96,8 +96,6 @@ with tab1:
             st.markdown(f"**Q:** {chat['question']}")
             st.markdown(f"**A:** {chat['answer']}")
             st.markdown("---")
-
-
 
 df = pd.read_csv("../data/my_data.csv")
 st.line_chart(df)

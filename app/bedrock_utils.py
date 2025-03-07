@@ -1,8 +1,12 @@
 import json
+import uuid
 
 import boto3
 import pandas as pd
 
+# config
+AGENT_ID = "VUO6QAAALP"
+AGENT_ALIAS_ID = "MJ8LT15FA7L"
 
 class BedrockService:
 # 클래스 초기화
@@ -15,6 +19,10 @@ class BedrockService:
             region_name='ap-northeast-2'
         )
         self.model_id = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+        self.bedrock_agent = boto3.client(
+            service_name='agent-supervisor-runtime',
+            region_name='ap-northeast-2'
+        )
 
 # 모델 호출
 ## Bedrock 모델 호출
@@ -48,7 +56,20 @@ class BedrockService:
             print(f"Error invoking Bedrock model: {str(e)}")
             return None
 
-# open search 연결 전 레벨에서의 자연어 쿼리 처리
+
+    def invoke_agent(self, session_id, prompt):
+        """Get a response from the Bedrock agent using specified parameters."""
+        response = self.bedrock_agent.invoke_agent(
+            agentId=AGENT_ID,
+            agentAliasId=AGENT_ALIAS_ID,
+            enableTrace=True,
+            sessionId=session_id,
+            inputText=prompt,
+        )
+
+        return response
+
+    # open search 연결 전 레벨에서의 자연어 쿼리 처리
 ## 자연어로 된 쿼리를 AWS 리소스 필터 파라미터로 전환
 ## 반환값: service_type, region, status를 포함하는 JSON 객체
 ## JSON 파싱로직 포함
@@ -188,7 +209,7 @@ class BedrockService:
             
             Provide a detailed, technical, yet easy to understand response.
             """
-            return self.invoke_model(prompt, max_tokens=2000, temperature=0.7)
+            return self.invoke_agent(session_id=str(uuid.uuid4()), prompt=prompt)
         except Exception as e:
             print(f"Error in chat with AWS expert: {str(e)}")
             return "Unable to process your question at this time."

@@ -8,8 +8,8 @@ import agent_lib as glib
 import guardrails
 
 # config
-AGENT_ID = "NGK1G2NQP2"
-AGENT_ALIAS_ID = "PJKGMNTGGR"
+AGENT_ID = "VUO6QAAALP"
+AGENT_ALIAS_ID = "MJ8LT15FA7L"
 
 # Load language data from JSON file
 with open('./localization.json', 'r', encoding='utf-8') as f:
