@@ -114,57 +114,6 @@ with tab1:
             st.markdown("---")
 
 
-with tab2:
-    st.header("💬 Chat with AWS Expert")
-
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-
-    user_question = st.text_input("Ask anything about AWS:", key="aws_expert_input")
-
-    if st.button("Ask Expert", key="ask_expert_button"):
-        if user_question:
-            try:
-                # DataFrame을 dict로 변환
-                resources_df = fetch_aws_resources()
-                cost_analysis = fetch_cost_analysis()
-
-                context = {
-                    'resources': resources_df.to_dict(orient='records') if not resources_df.empty else [],
-                    'cost_data': {
-                        'service_costs': cost_analysis['service_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'service_costs' in cost_analysis else [],
-                        'region_costs': cost_analysis['region_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'region_costs' in cost_analysis else [],
-                        'daily_costs': cost_analysis['daily_costs'].to_dict(orient='records') if isinstance(
-                            cost_analysis, dict) and 'daily_costs' in cost_analysis else []
-                    } if cost_analysis else {}
-                }
-
-                # 컨텍스트 데이터 로깅
-                debug_print(f"Context data structure: {json.dumps(context, indent=2)}")
-
-                response = bedrock_service.chat_with_aws_expert(user_question, context)
-
-                if response:
-                    st.session_state.chat_history.append({
-                        "question": user_question,
-                        "answer": response
-                    })
-
-                    # 최신 응답 표시
-                    st.markdown(f"**Q:** {user_question}")
-                    st.markdown(f"**A:** {response}")
-                    st.markdown("---")
-                else:
-                    st.error("Failed to get response from AWS Expert")
-
-            except Exception as e:
-                st.error(f"Error processing request: {str(e)}")
-                debug_print(f"Error details: {str(e)}")
-        else:
-            st.warning("Please enter a question first.")
-
 
 df = pd.read_csv("../data/my_data.csv")
 st.line_chart(df)
