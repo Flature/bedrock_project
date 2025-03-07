@@ -1,6 +1,6 @@
-import boto3
 import json
-import os
+
+import boto3
 import pandas as pd
 
 
@@ -13,7 +13,7 @@ class BedrockService:
     def __init__(self):
         self.bedrock_runtime = boto3.client(
             service_name='bedrock-runtime',
-            region_name='us-east-1'
+            region_name='ap-northeast-2'
         )
         self.model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
 
