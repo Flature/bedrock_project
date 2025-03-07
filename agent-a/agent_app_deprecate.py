@@ -4,15 +4,15 @@ import uuid
 
 import streamlit as st
 
-import agent_lib as glib
-import guardrails
+import agent_lib_deprecate as glib
+import guardrails_deprecate
 
 # config
 AGENT_ID = "NGK1G2NQP2"
 AGENT_ALIAS_ID = "PJKGMNTGGR"
 
 # Load language data from JSON file
-with open('./localization.json', 'r', encoding='utf-8') as f:
+with open('localization_deprecate.json', 'r', encoding='utf-8') as f:
     LANG = json.load(f)
 
 # # functions

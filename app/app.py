@@ -5,7 +5,6 @@ import pandas as pd
 
 from aws_services import AWSResourceCollector
 from bedrock_utils import BedrockService
-from agent_lib import get_agent_response
 
 # 디버그 모드 설정
 DEBUG = True

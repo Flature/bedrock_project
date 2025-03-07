@@ -17,7 +17,6 @@ class AWSResourceCollector:
         self.cloudwatch = boto3.client('cloudwatch', 'ap-northeast-2')
         self.ec2 = boto3.client('ec2', 'ap-northeast-2')
         self.rds = boto3.client('rds', 'ap-northeast-2')
-        self.ce = boto3.client('ce')
 
         self.service_mapping = {
             'EC2': 'Amazon Elastic Compute Cloud - Compute',
