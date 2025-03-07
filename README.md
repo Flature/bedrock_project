@@ -7,6 +7,11 @@ sudo yum install git
 sudo yum install python3.11
 ```
 
+### git repository 연동
+```zsh
+https://github.com/Flature/bedrock_project.git
+```
+
 ### 가상환경 설치
 ```zsh
 python -m venv _bedrock-project
