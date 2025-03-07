@@ -27,13 +27,6 @@ def fetch_aws_resources():
     return resources
 
 
-@st.cache_data(ttl=300)
-def fetch_cost_analysis():
-    debug_print("Fetching cost analysis...")
-    collector = AWSResourceCollector()
-    analysis = collector.get_cost_analysis()
-    return analysis
-
 
 def debug_print(message):
     if DEBUG:
