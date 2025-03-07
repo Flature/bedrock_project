@@ -49,11 +49,6 @@ tab1, tab2 = st.tabs([
     "Etc"
 ])
 
-st.write("""
-# AWS Resource Monitor
-Cloud Development Department
-""")
-
 # 탭 1: AWS Expert Chat
 ## AI전문가와의 채팅 인터페이스 추가
 ## 채팅 히스토리 관리
