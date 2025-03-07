@@ -6,12 +6,13 @@ import pandas as pd
 
 # config
 AGENT_ID = "VUO6QAAALP"
-AGENT_ALIAS_ID = "MJ8LT15FA7L"
+AGENT_ALIAS_ID = "WN2YZNUER4"
+
 
 class BedrockService:
-# 클래스 초기화
-## AWS Bedrock 서비스 클라이언트 초기화
-## Claude 3 Sonnet 을 기본 모델로 설정 (변경 필요하면 시도해보셔도 좋습니다)
+    # 클래스 초기화
+    ## AWS Bedrock 서비스 클라이언트 초기화
+    ## Claude 3 Sonnet 을 기본 모델로 설정 (변경 필요하면 시도해보셔도 좋습니다)
 
     def __init__(self):
         self.bedrock_runtime = boto3.client(
@@ -24,12 +25,12 @@ class BedrockService:
             region_name='ap-northeast-2'
         )
 
-# 모델 호출
-## Bedrock 모델 호출
-## Prompt: 입력 텍스트
-## max_tokens : 최대 응답 토큰 수
-## temperature : 응답의 창의성 정도 (실험 필요시 조정하여 활용하실 수 있습니다)
-    
+    # 모델 호출
+    ## Bedrock 모델 호출
+    ## Prompt: 입력 텍스트
+    ## max_tokens : 최대 응답 토큰 수
+    ## temperature : 응답의 창의성 정도 (실험 필요시 조정하여 활용하실 수 있습니다)
+
     def invoke_model(self, prompt, max_tokens=1000, temperature=0.7):
         try:
             body = {
@@ -43,19 +44,18 @@ class BedrockService:
                 ],
                 "temperature": temperature
             }
-            
+
             response = self.bedrock_runtime.invoke_model(
                 modelId=self.model_id,
                 body=json.dumps(body)
             )
-            
+
             response_body = json.loads(response['body'].read())
             return response_body['content'][0]['text']
-            
+
         except Exception as e:
             print(f"Error invoking Bedrock model: {str(e)}")
             return None
-
 
     def invoke_agent(self, session_id, prompt):
         """Get a response from the Bedrock agent using specified parameters."""
@@ -69,98 +69,16 @@ class BedrockService:
 
         return response
 
-    # open search 연결 전 레벨에서의 자연어 쿼리 처리
-## 자연어로 된 쿼리를 AWS 리소스 필터 파라미터로 전환
-## 반환값: service_type, region, status를 포함하는 JSON 객체
-## JSON 파싱로직 포함
+    # 추천 사항 강화
+    ## AWS 리소스에 대한 최적화 추천사항 제공
+    ## 구체적인 행동 계획, 비용 절감 가능성, 성능 영향 등 포함
+    ## DataFrame 혹은 dict 형태의 데이터 처리 가능
 
-    def process_natural_language_query(self, query):
-        try:
-            prompt = f"""
-            Convert this natural language query to AWS resource filter parameters.
-            Query: {query}
-            
-            Return only a JSON object with these exact fields:
-            {{
-                "service_type": "EC2" or "RDS" or "Lambda" or "S3",
-                "region": "region name if specified, otherwise null",
-                "status": "status if specified, otherwise null"
-            }}
-            """
-            
-            response = self.invoke_model(prompt, max_tokens=500, temperature=0)
-            if response:
-                try:
-                    # JSON 문자열에서 실제 JSON 객체 부분만 추출
-                    json_str = response.strip()
-                    if '{' in json_str and '}' in json_str:
-                        json_str = json_str[json_str.find('{'):json_str.rfind('}')+1]
-                    return json.loads(json_str)
-                except json.JSONDecodeError as e:
-                    print(f"Error parsing JSON response: {str(e)}")
-                    return {
-                        "service_type": None,
-                        "region": None,
-                        "status": None
-                    }
-            return None
-        except Exception as e:
-            print(f"Error in process_natural_language_query: {str(e)}")
-            return None
-
-# 비용 인사이트 생성
-## AWS 비용 데이터를 분석하여 인사이트 제공
-## 주요 비용 요인, 비정상패턴, 최적화 기회, 트랜드 등 분석
-## DataFrame을 dict로 변환하여 처리함
-
-    def generate_cost_insights(self, cost_data):
-        try:
-            cost_data_dict = {
-                'service_costs': cost_data['service_costs'].to_dict(orient='records'),
-                'region_costs': cost_data['region_costs'].to_dict(orient='records'),
-                'daily_costs': cost_data['daily_costs'].to_dict(orient='records') if 'daily_costs' in cost_data else []
-            }
-    
-            prompt = f"""
-            다음 AWS 비용 데이터를 분석하여 상세한 인사이트를 제공해주세요:
-            {json.dumps(cost_data_dict)}
-            
-            다음 항목들에 대해 분석해주세요:
-            1. 주요 비용 발생 요인
-            2. 비정상적인 패턴이나 급격한 비용 증가
-            3. 비용 최적화가 가능한 영역
-            4. 전반적인 비용 추세와 향후 예측
-            
-            분석 결과를 다음과 같은 형식으로 제공해주세요:
-    
-            ### 주요 비용 발생 요인
-            - [구체적인 분석 내용]
-    
-            ### 이상 패턴 분석
-            - [비정상적인 비용 패턴 설명]
-    
-            ### 최적화 기회
-            - [구체적인 최적화 방안]
-    
-            ### 비용 추세
-            - [추세 분석 및 예측]
-            """
-            return self.invoke_model(prompt, max_tokens=1500, temperature=0.3)
-        except Exception as e:
-            print(f"Error generating cost insights: {str(e)}")
-            return "현재 비용 분석을 생성할 수 없습니다."
-    
-
-#추천 사항 강화
-## AWS 리소스에 대한 최적화 추천사항 제공
-## 구체적인 행동 계획, 비용 절감 가능성, 성능 영향 등 포함
-## DataFrame 혹은 dict 형태의 데이터 처리 가능
-    
     def enhance_recommendations(self, resource_data):
         try:
             if isinstance(resource_data, pd.DataFrame):
                 resource_data = resource_data.to_dict(orient='records')
-    
+
             prompt = f"""
             다음 AWS 리소스에 대한 상세한 최적화 전략을 제공해주세요:
             {json.dumps(resource_data)}
@@ -182,14 +100,11 @@ class BedrockService:
             print(f"Error enhancing recommendations: {str(e)}")
             return "현재 추천 사항을 생성할 수 없습니다."
 
+    # AWS 전문가 채팅
+    ## AWS 관련 질문에 대한 전문가 수준의 응답제공
+    ## 추가 컨텍스트 정보 활용
+    ## 기술적이면서도 이해하기 쉬운 응답 생성
 
-
-
-# AWS 전문가 채팅
-## AWS 관련 질문에 대한 전문가 수준의 응답제공
-## 추가 컨텍스트 정보 활용
-## 기술적이면서도 이해하기 쉬운 응답 생성
-    
     def chat_with_aws_expert(self, user_question, context=None):
         try:
             # context가 DataFrame인 경우 dict로 변환
