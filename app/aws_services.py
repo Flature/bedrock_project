@@ -111,48 +111,6 @@ class AWSResourceCollector:
             print(f"Error getting CloudWatch metrics: {str(e)}")
             return {}
 
-    # When calling the GetCostAndUsageWithResources operation:
-    # start date is the max supported days for hourly granularity is 14 days
-    def get_resource_cost(self, resource_id, service_type, region):
-        """리소스별 비용 조회 (get_cost_and_usage_with_resources 사용)"""
-        with_resources_days = 14
-        try:
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=with_resources_days)
-
-            # 필요에 따라 태그 정보도 가져옵니다.
-            tags = self.ec2.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [resource_id]}])['Tags']
-            name_tag = next((tag['Value'] for tag in tags if tag['Key'] == 'Name'), None)
-            print("#############")
-            print(f"Res & Tag : {resource_id}: {name_tag}")
-            print("#############")
-
-            response = self.ce.get_cost_and_usage_with_resources(
-                TimePeriod={
-                    'Start': start_date.strftime('%Y-%m-%d'),
-                    'End': end_date.strftime('%Y-%m-%d')
-                },
-                Granularity='MONTHLY',
-                Metrics=['UnblendedCost'],
-                Filter={
-                    'And': [
-                        {'Dimensions': {'Key': 'REGION', 'Values': [region]}},
-                        {'Dimensions': {'Key': 'SERVICE', 'Values': [self.service_mapping[service_type]]}},
-                        {'Dimensions': {'Key': 'RESOURCE_ID', 'Values': [resource_id]}}
-                    ]
-                }
-            )
-            print("service:", [self.service_mapping[service_type]])
-            print(f"Cost Explorer response for {resource_id}: {response}", flush=True)
-
-            if response['ResultsByTime']:
-                return float(response['ResultsByTime'][0]['Total']['UnblendedCost']['Amount'])
-            return 0.0
-
-        except Exception as e:
-            print(f"Error getting resource cost: {str(e)}")
-            return 0.0
-
     # EC2 데이터 수집
     ## 모든 리전의 EC2 instance 정보를 수집
     ## 인스턴스 ID, Status, Type, IP주소 등의 상세 정보를 수집 --> 필요시 이부분도 원하시는대로 변경해주세요
@@ -177,11 +135,7 @@ class AWSResourceCollector:
                                     region
                                 )
 
-                                cost = self.get_resource_cost(
-                                    instance['InstanceId'],
-                                    'EC2',
-                                    region
-                                )
+
 
                                 instance_data = {
                                     'resource_id': instance['InstanceId'],
@@ -191,7 +145,7 @@ class AWSResourceCollector:
                                     'creation_date': instance['LaunchTime'].strftime('%Y-%m-%d %H:%M:%S'),
                                     'last_modified': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                     'tags': json.dumps({tag['Key']: tag['Value'] for tag in instance.get('Tags', [])}),
-                                    'cost': cost,
+
                                     'details': {
                                         'instance_type': instance['InstanceType'],
                                         'private_ip': instance.get('PrivateIpAddress', ''),
@@ -237,11 +191,6 @@ class AWSResourceCollector:
                                 region
                             )
 
-                            cost = self.get_resource_cost(
-                                instance['DBInstanceIdentifier'],
-                                'RDS',
-                                region
-                            )
 
                             instance_data = {
                                 'resource_id': instance['DBInstanceIdentifier'],
@@ -251,7 +200,7 @@ class AWSResourceCollector:
                                 'creation_date': instance['InstanceCreateTime'].strftime('%Y-%m-%d %H:%M:%S'),
                                 'last_modified': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                 'tags': json.dumps({tag['Key']: tag['Value'] for tag in instance.get('TagList', [])}),
-                                'cost': cost,
+
                                 'details': {
                                     'engine': instance['Engine'],
                                     'engine_version': instance['EngineVersion'],
@@ -298,11 +247,6 @@ class AWSResourceCollector:
                                     region
                                 )
 
-                                cost = self.get_resource_cost(
-                                    function['FunctionName'],
-                                    'Lambda',
-                                    region
-                                )
 
                                 # 태그 정보 가져오기
                                 tags_response = lambda_client.list_tags(
@@ -326,7 +270,7 @@ class AWSResourceCollector:
                                     'creation_date': last_modified,
                                     'last_modified': last_modified,
                                     'tags': json.dumps(tags_response.get('Tags', {})),
-                                    'cost': cost,
+
                                     'details': {
                                         'runtime': function.get('Runtime', ''),
                                         'memory': function.get('MemorySize', 0),
