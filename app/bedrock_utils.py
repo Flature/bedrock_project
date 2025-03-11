@@ -6,7 +6,7 @@ import pandas as pd
 
 # config
 AGENT_ID = "VUO6QAAALP"
-AGENT_ALIAS_ID = "WN2YZNUER4"
+AGENT_ALIAS_ID = "S7ADNJZET2"
 
 
 class BedrockService:
