@@ -12,7 +12,7 @@ DEBUG = True
 
 def debug_print(message):
     if DEBUG:
-        print(f"DEBUG: {message}")
+        print(f"DEBUG test: {message}")
 
 
 # Bedrock 서비스 초기화
