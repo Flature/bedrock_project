@@ -102,33 +102,23 @@ with tab1:
                             elif "guardrailTrace" in each_trace:
                                 logging.log("guardrailTrace")
 
-                    trace_container.divider()
-                    trace_container.subheader("analysis_report")
-                    styled_text = re.sub(
-                        r'\{([^}]+)\}',
-                        r'<span style="background-color: #ffd700; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: #1e1e1e;">\1</span>',
-                        output_text
-                    )
-                    trace_container.markdown(styled_text, unsafe_allow_html=True)
+                trace_container.divider()
+                trace_container.subheader("analysis_report")
+                styled_text = re.sub(
+                    r'\{([^}]+)\}',
+                    r'<span style="background-color: #ffd700; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: #1e1e1e;">\1</span>',
+                    output_text
+                )
+                trace_container.markdown(styled_text, unsafe_allow_html=True)
 
-                    # 최신 응답 표시
-                    st.markdown(f"**Q:** {user_question}")
-                    st.markdown(f"**A:** {response}")
-                    st.markdown("---")
-                else:
-                    st.error("Failed to get response from AWS Expert")
+                # 최신 응답 표시
+                st.markdown(f"**Q:** {user_question}")
+                st.markdown(f"**A:** {response}")
+                st.markdown("---")
 
             except Exception as e:
                 st.error(f"Error processing request: {str(e)}")
                 debug_print(f"Error details: {str(e)}")
-
-    # 이전 채팅 히스토리 표시
-    if st.session_state.chat_history:
-        st.subheader("Previous Conversations")
-        for chat in reversed(st.session_state.chat_history[:-1]):  # 최신 응답 제외
-            st.markdown(f"**Q:** {chat['question']}")
-            st.markdown(f"**A:** {chat['answer']}")
-            st.markdown("---")
 
 # df = pd.read_csv("../data/my_data.csv")
 # st.line_chart(df)
