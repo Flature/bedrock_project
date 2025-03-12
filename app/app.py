@@ -113,7 +113,8 @@ with tab1:
                 # 최신 응답 표시
                 trace_container.divider()
                 trace_container.markdown(f"**Q:** {user_question}")
-                trace_container.markdown(f"**A:** {response}")
+                trace_container.markdown(f"**Raw:** {response}")
+                trace_container.markdown(f"**A:** {output_text}")
                 trace_container.markdown("---")
 
             except Exception as e:
