@@ -43,6 +43,8 @@ tab1, tab2 = st.tabs([
     "Etc"
 ])
 
+trace_container = st.container()
+
 # 탭 1: AWS Expert Chat
 ## AI전문가와의 채팅 인터페이스 추가
 ## 채팅 히스토리 관리
@@ -50,8 +52,6 @@ tab1, tab2 = st.tabs([
 
 with tab1:
     st.header("💬 Chat with AWS Expert")
-
-    trace_container = st.container()
 
     user_question = st.text_input("Ask anything about AWS:", key="aws_expert_input")
     submit_button = st.button("Ask Expert", key="ask_expert_button")
