@@ -93,6 +93,7 @@ with tab1:
                                     function_name = ""
 
                                 else:
+                                    print(f"function_name : {function_name}")
                                     function_name = trace.get('invocationInput', {}).get('actionGroupInvocationInput',
                                                                                          {}).get(
                                         'function', "")
