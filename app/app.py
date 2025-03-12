@@ -1,4 +1,5 @@
 import json
+import logging
 
 import streamlit as st
 import pandas as pd
@@ -17,6 +18,9 @@ def debug_print(message):
 
 # Bedrock 서비스 초기화
 bedrock_service = BedrockService()
+
+# Container for real-time updates
+trace_container = st.container()
 
 
 @st.cache_data(ttl=300)
@@ -53,23 +57,51 @@ with tab1:
         st.session_state.chat_history = []
 
     user_question = st.text_input("Ask anything about AWS:", key="aws_expert_input")
+    submit_button = st.button("Ask Expert", key="ask_expert_button")
 
-    if st.button("Ask Expert", key="ask_expert_button"):
-        if user_question:
+    if user_question and submit_button:
+        with st.spinner("generating reasoning"):
             try:
-                # DataFrame을 dict로 변환
-                resources_df = fetch_aws_resources()
-
-                context = {
-                    'resources': resources_df.to_dict(orient='records') if not resources_df.empty else []
-                }
-
-                # 컨텍스트 데이터 로깅
-                debug_print(f"Context data structure: {json.dumps(context, indent=2)}")
-
                 response = bedrock_service.chat_with_aws_expert(user_question)
-
                 if response:
+                    trace_container.subheader("bedrock_reasoning")
+
+                    output_text = ""
+                    function_name = ""
+
+                    for event in response.get("completion"):
+                        if "chunk" in event:
+                            chunk = event["chunk"]
+                            output_text += chunk["bytes"].decode()
+
+                        if "trace" in event:
+                            each_trace = event["trace"]["trace"]
+
+                            if "orchestrationTrace" in each_trace:
+                                trace = event["trace"]["trace"]["orchestrationTrace"]
+
+                                if "rationale" in trace:
+                                    with trace_container.chat_message("ai"):
+                                        st.markdown(trace['rationale']['text'])
+
+                                elif function_name != "":
+                                    print("trace_container : ", trace_container)
+                                    print("trace : ", trace)
+                                    answer = json.loads(
+                                        trace.get('observation', {}).get('actionGroupInvocationOutput', {}).get('text'))
+                                    trace_container.markdown(f"**Answer**")
+                                    trace_container.write(f"{answer}")
+
+                                    function_name = ""
+
+                                else:
+                                    function_name = trace.get('invocationInput', {}).get('actionGroupInvocationInput',
+                                                                                         {}).get(
+                                        'function', "")
+
+                            elif "guardrailTrace" in each_trace:
+                                logging.log("guardrailTrace")
+
                     st.session_state.chat_history.append({
                         "question": user_question,
                         "answer": response
@@ -85,8 +117,6 @@ with tab1:
             except Exception as e:
                 st.error(f"Error processing request: {str(e)}")
                 debug_print(f"Error details: {str(e)}")
-        else:
-            st.warning("Please enter a question first.")
 
     # 이전 채팅 히스토리 표시
     if st.session_state.chat_history:
