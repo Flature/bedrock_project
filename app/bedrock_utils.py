@@ -105,25 +105,9 @@ class BedrockService:
     ## 추가 컨텍스트 정보 활용
     ## 기술적이면서도 이해하기 쉬운 응답 생성
 
-    def chat_with_aws_expert(self, user_question, context=None):
+    def chat_with_aws_expert(self, user_question):
         try:
-            # context가 DataFrame인 경우 dict로 변환
-            if isinstance(context, pd.DataFrame):
-                context = context.to_dict(orient='records')
-            elif isinstance(context, dict):
-                for key, value in context.items():
-                    if isinstance(value, pd.DataFrame):
-                        context[key] = value.to_dict(orient='records')
-
-            prompt = f"""
-            You are an AWS expert. Answer this question about AWS resources:
-            Question: {user_question}
-            
-            Context (if available):
-            {json.dumps(context) if context else 'No additional context provided'}
-            
-            Provide a detailed, technical, yet easy to understand response.
-            """
+            prompt = user_question
             return self.invoke_agent(session_id=str(uuid.uuid4()), prompt=prompt)
         except Exception as e:
             print(f"Error in chat with AWS expert: {str(e)}")
