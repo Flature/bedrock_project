@@ -111,12 +111,13 @@ with tab1:
                 trace_container.markdown(styled_text, unsafe_allow_html=True)
 
                 # 최신 응답 표시
-                st.markdown(f"**Q:** {user_question}")
-                st.markdown(f"**A:** {response}")
-                st.markdown("---")
+                trace_container.divider()
+                trace_container.markdown(f"**Q:** {user_question}")
+                trace_container.markdown(f"**A:** {response}")
+                trace_container.markdown("---")
 
             except Exception as e:
-                st.error(f"Error processing request: {str(e)}")
+                trace_container.error(f"Error processing request: {str(e)}")
                 debug_print(f"Error details: {str(e)}")
 
 # df = pd.read_csv("../data/my_data.csv")
