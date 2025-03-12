@@ -19,9 +19,6 @@ def debug_print(message):
 # Bedrock 서비스 초기화
 bedrock_service = BedrockService()
 
-# Container for real-time updates
-trace_container = st.container()
-
 
 @st.cache_data(ttl=300)
 def fetch_aws_resources():
@@ -52,6 +49,9 @@ tab1, tab2 = st.tabs([
 
 with tab1:
     st.header("💬 Chat with AWS Expert")
+
+    # Container for real-time updates
+    trace_container = st.container()
 
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
