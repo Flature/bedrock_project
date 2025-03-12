@@ -126,8 +126,8 @@ with tab1:
             st.markdown(f"**A:** {chat['answer']}")
             st.markdown("---")
 
-df = pd.read_csv("../data/my_data.csv")
-st.line_chart(df)
+# df = pd.read_csv("../data/my_data.csv")
+# st.line_chart(df)
 
 # 푸터
 st.markdown("---")
