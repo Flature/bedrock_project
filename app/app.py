@@ -51,15 +51,13 @@ tab1, tab2 = st.tabs([
 with tab1:
     st.header("💬 Chat with AWS Expert")
 
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
+    trace_container = st.container()
 
     user_question = st.text_input("Ask anything about AWS:", key="aws_expert_input")
     submit_button = st.button("Ask Expert", key="ask_expert_button")
 
     if user_question and submit_button:
         # Container for real-time updates
-        trace_container = st.container()
         with st.spinner("generating reasoning"):
             try:
                 response = bedrock_service.chat_with_aws_expert(user_question)
@@ -89,8 +87,8 @@ with tab1:
                                     print("trace : ", trace)
                                     answer = json.loads(
                                         trace.get('observation', {}).get('actionGroupInvocationOutput', {}).get('text'))
-                                    trace_container.markdown(f"**Answer**")
-                                    trace_container.write(f"{answer}")
+                                    #trace_container.markdown(f"**Answer**")
+                                    #trace_container.write(f"{answer}")
 
                                     function_name = ""
 
