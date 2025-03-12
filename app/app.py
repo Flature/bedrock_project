@@ -67,7 +67,7 @@ with tab1:
                 # 컨텍스트 데이터 로깅
                 debug_print(f"Context data structure: {json.dumps(context, indent=2)}")
 
-                response = bedrock_service.chat_with_aws_expert(user_question, context)
+                response = bedrock_service.chat_with_aws_expert(user_question)
 
                 if response:
                     st.session_state.chat_history.append({
