@@ -6,6 +6,7 @@ import pandas as pd
 
 from aws_services import AWSResourceCollector
 from bedrock_utils import BedrockService
+import re
 
 # 디버그 모드 설정
 DEBUG = True
@@ -50,9 +51,6 @@ tab1, tab2 = st.tabs([
 with tab1:
     st.header("💬 Chat with AWS Expert")
 
-    # Container for real-time updates
-    trace_container = st.container()
-
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
 
@@ -60,6 +58,8 @@ with tab1:
     submit_button = st.button("Ask Expert", key="ask_expert_button")
 
     if user_question and submit_button:
+        # Container for real-time updates
+        trace_container = st.container()
         with st.spinner("generating reasoning"):
             try:
                 response = bedrock_service.chat_with_aws_expert(user_question)
@@ -102,10 +102,14 @@ with tab1:
                             elif "guardrailTrace" in each_trace:
                                 logging.log("guardrailTrace")
 
-                    st.session_state.chat_history.append({
-                        "question": user_question,
-                        "answer": response
-                    })
+                    trace_container.divider()
+                    trace_container.subheader("analysis_report")
+                    styled_text = re.sub(
+                        r'\{([^}]+)\}',
+                        r'<span style="background-color: #ffd700; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: #1e1e1e;">\1</span>',
+                        output_text
+                    )
+                    trace_container.markdown(styled_text, unsafe_allow_html=True)
 
                     # 최신 응답 표시
                     st.markdown(f"**Q:** {user_question}")
