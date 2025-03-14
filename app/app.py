@@ -116,13 +116,11 @@ with tab1:
                 # 최신 응답 표시
                 trace_container.divider()
                 trace_container.markdown(f"**Q:** {user_question}")
-                trace_container.markdown(f"**Raw:** {response}")
                 trace_container.markdown(f"**A:** {output_text}")
                 trace_container.markdown("---")
 
                 st.session_state.chat_history.append({
                     "question": user_question,
-                    "row": response,
                     "answer": output_text
                 })
 
@@ -130,7 +128,6 @@ with tab1:
                     trace_container.subheader("Previous Conversations")
                     for chat in reversed(st.session_state.chat_history[:-1]):  # 최신 응답 제외
                         trace_container.markdown(f"**Q:** {chat['question']}")
-                        trace_container.markdown(f"**Raw:** {response}")
                         trace_container.markdown(f"**A:** {chat['answer']}")
                         trace_container.markdown("---")
 
