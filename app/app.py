@@ -70,7 +70,7 @@ with tab1:
                 response = bedrock_service.chat_with_aws_expert(user_question=user_question, session_id=sessionId)
 
                 if response:
-                    session_id = json.loads(response["sessionId"])
+                    session_id = response.get("sessionId")
                     if session_id:
                         st.session_state.session_id = session_id
 
