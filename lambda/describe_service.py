@@ -72,7 +72,7 @@ def get_resource_cost(resource_id, service_type, region):
         return 0.0
 
 
-def collect_ec2_data(region):
+def collect_ec2_data(region, account_id):
     """EC2 인스턴스 데이터 수집"""
     print("Collecting EC2 data...")
     try:
@@ -82,7 +82,26 @@ def collect_ec2_data(region):
             if not region:
                 print("No region specified, collecting data from all regions...")
 
-            ec2_client = boto3.client('ec2', region_name=region)
+            # ec2_client = boto3.client('ec2', region_name=region)
+            if account_id:
+                sts_client = boto3.client('sts')
+                assumed_role = sts_client.assume_role(
+                    RoleArn=f"arn:aws:iam::{account_id}:role/Administrator",
+                    RoleSessionName="EC2ClientSession"
+                )
+
+                credentials = assumed_role['Credentials']
+
+                ec2_client = boto3.client(
+                    'ec2',
+                    region_name=region,
+                    aws_access_key_id=credentials['AccessKeyId'],
+                    aws_secret_access_key=credentials['SecretAccessKey'],
+                    aws_session_token=credentials['SessionToken']
+                )
+            else:
+                ec2_client = boto3.client('ec2', region_name=region)
+
             response = ec2_client.describe_instances()
             for reservation in response['Reservations']:
                 for instance in reservation['Instances']:
@@ -90,7 +109,8 @@ def collect_ec2_data(region):
                         metrics = get_cloudwatch_metrics(
                             instance['InstanceId'],
                             'EC2',
-                            region
+                            region,
+                            account_id
                         )
                         '''cost는 권한이 없어 주석 처리 20250311 '''
                         # cost = get_resource_cost(
@@ -137,11 +157,27 @@ def collect_ec2_data(region):
         return {"statusCode": 500, "body": "Error collecting EC2 data"}
 
 
-def get_cloudwatch_metrics(resource_id, service_type, region, period=3600):
-    period = 600
+def get_cloudwatch_metrics(resource_id, service_type, region, account_id, period=600):
     """CloudWatch 메트릭 EC2 데이터 수집"""
     try:
-        cloudwatch = boto3.client('cloudwatch', region_name=region)
+        if account_id:
+            sts_client = boto3.client('sts')
+            assumed_role = sts_client.assume_role(
+                RoleArn=f"arn:aws:iam::{account_id}:role/Administrator",
+                RoleSessionName="CloudWatchClientSession"
+            )
+
+            credentials = assumed_role['Credentials']
+            cloudwatch_client = boto3.client(
+                'cloudwatch',
+                region_name=region,
+                aws_access_key_id=credentials['AccessKeyId'],
+                aws_secret_access_key=credentials['SecretAccessKey'],
+                aws_session_token=credentials['SessionToken']
+            )
+        else:
+            cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+
         metrics_data = {}
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(hours=1)
@@ -175,7 +211,7 @@ def get_cloudwatch_metrics(resource_id, service_type, region, period=3600):
 
             for metric_name, unit in config['metrics']:
                 try:
-                    response = cloudwatch.get_metric_statistics(
+                    response = cloudwatch_client.get_metric_statistics(  # <-- 여기 수정
                         Namespace=config['namespace'],
                         MetricName=metric_name,
                         Dimensions=dimension,
@@ -186,7 +222,6 @@ def get_cloudwatch_metrics(resource_id, service_type, region, period=3600):
                     )
 
                     if response['Datapoints']:
-                        # print("RESPONSE", response['Datapoints'])
                         metrics_data[metric_name] = {
                             'value': round(response['Datapoints'][-1]['Average'], 2),
                             'unit': unit,
@@ -202,7 +237,7 @@ def get_cloudwatch_metrics(resource_id, service_type, region, period=3600):
         return {}
 
 
-def collect_rds_data(region):
+def collect_rds_data(region, account_id):
     """RDS 인스턴스 데이터 수집"""
     print("Collecting RDS data...")
     try:
@@ -212,14 +247,33 @@ def collect_rds_data(region):
             if not region:
                 print("No region specified, collecting data from all regions...")
 
-            rds_client = boto3.client('rds', region_name=region)
+            if account_id:
+                sts_client = boto3.client('sts')
+                assumed_role = sts_client.assume_role(
+                    RoleArn=f"arn:aws:iam::{account_id}:role/Administrator",
+                    RoleSessionName="RDSClientSession"
+                )
+
+                credentials = assumed_role['Credentials']
+
+                rds_client = boto3.client(
+                    'rds',
+                    region_name=region,
+                    aws_access_key_id=credentials['AccessKeyId'],
+                    aws_secret_access_key=credentials['SecretAccessKey'],
+                    aws_session_token=credentials['SessionToken']
+                )
+            else:
+                rds_client = boto3.client('rds', region_name=region)
+
             response = rds_client.describe_db_instances()
             for instance in response['DBInstances']:
                 try:
                     metrics = get_cloudwatch_metrics(
                         instance['DBInstanceIdentifier'],
                         'RDS',
-                        region
+                        region,
+                        account_id
                     )
                     # ''' cost는 권한이 없어 주석 처리 20250311 '''
                     # cost = get_resource_cost(
@@ -313,10 +367,12 @@ def lambda_handler(event, context):
 
     if function == 'collect_ec2_data':
         region = get_named_parameter(event, "region")
-        output = collect_ec2_data(region)
+        account_id = get_named_parameter(event, "account_id")
+        output = collect_ec2_data(region, account_id)
     elif function == 'collect_rds_data':
         region = get_named_parameter(event, "region")
-        output = collect_rds_data(region)
+        account_id = get_named_parameter(event, "account_id")
+        output = collect_rds_data(region, account_id)
     else:
         output = 'Invalid function'
 

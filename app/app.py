@@ -36,7 +36,7 @@ def debug_print(message):
 
 
 # 제목
-st.title("☁️ AWS Resource Monitor")
+st.title("☁️ Meerkat Project")
 
 # 탭 생성
 tab1, tab2 = st.tabs([
