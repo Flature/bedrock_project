@@ -82,10 +82,12 @@ with tab1:
 
                     for event in response.get("completion"):
                         if "chunk" in event:
+                            print("chunk called")
                             chunk = event["chunk"]
                             output_text += chunk["bytes"].decode()
 
                         if "trace" in event:
+                            print("trace called")
                             each_trace = event["trace"]["trace"]
 
                             if "orchestrationTrace" in each_trace:
