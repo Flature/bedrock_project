@@ -69,11 +69,7 @@ with tab1:
                 response = bedrock_service.chat_with_aws_expert(user_question=user_question, session_id=sessionId)
 
                 if response:
-                    response_body = json.loads(response["body"].read().decode("utf-8"))
-                    bot_response = response_body.get("messages", [{"content": "No response"}])[0]["content"]
-                    session_id = response_body.get("sessionId")
-                    if session_id:
-                        st.session_state.session_id = session_id
+                    print("raw response"+ response)
 
                     trace_container.subheader("bedrock_reasoning")
 
