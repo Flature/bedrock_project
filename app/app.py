@@ -51,6 +51,9 @@ trace_container = st.container()
 ## 컨텍스트 기반 응답
 
 with tab1:
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
     st.header("💬 Chat with AWS Expert")
 
     user_question = st.text_input("Ask anything about AWS:", key="aws_expert_input")
@@ -116,6 +119,20 @@ with tab1:
                 trace_container.markdown(f"**Raw:** {response}")
                 trace_container.markdown(f"**A:** {output_text}")
                 trace_container.markdown("---")
+
+                st.session_state.chat_history.append({
+                    "question": user_question,
+                    "row": response,
+                    "answer": output_text
+                })
+
+                if st.session_state.chat_history:
+                    trace_container.subheader("Previous Conversations")
+                    for chat in reversed(st.session_state.chat_history[:-1]):  # 최신 응답 제외
+                        trace_container.markdown(f"**Q:** {chat['question']}")
+                        trace_container.markdown(f"**Raw:** {response}")
+                        trace_container.markdown(f"**A:** {chat['answer']}")
+                        trace_container.markdown("---")
 
             except Exception as e:
                 trace_container.error(f"Error processing request: {str(e)}")
