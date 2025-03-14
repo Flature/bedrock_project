@@ -105,10 +105,10 @@ class BedrockService:
     ## 추가 컨텍스트 정보 활용
     ## 기술적이면서도 이해하기 쉬운 응답 생성
 
-    def chat_with_aws_expert(self, user_question):
+    def chat_with_aws_expert(self, user_question, session_id):
         try:
             prompt = user_question
-            return self.invoke_agent(session_id=str(uuid.uuid4()), prompt=prompt)
+            return self.invoke_agent(session_id=session_id, prompt=prompt)
         except Exception as e:
             print(f"Error in chat with AWS expert: {str(e)}")
             return "Unable to process your question at this time."

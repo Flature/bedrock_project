@@ -53,6 +53,8 @@ trace_container = st.container()
 with tab1:
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = None
 
     st.header("💬 Chat with AWS Expert")
 
@@ -63,8 +65,16 @@ with tab1:
         # Container for real-time updates
         with st.spinner("generating reasoning"):
             try:
-                response = bedrock_service.chat_with_aws_expert(user_question)
+                sessionId = st.session_state.session_id or ""
+                response = bedrock_service.chat_with_aws_expert(user_question=user_question, session_id=sessionId)
+
                 if response:
+                    response_body = json.loads(response["body"].read().decode("utf-8"))
+                    bot_response = response_body.get("messages", [{"content": "No response"}])[0]["content"]
+                    session_id = response_body.get("sessionId")
+                    if session_id:
+                        st.session_state.session_id = session_id
+
                     trace_container.subheader("bedrock_reasoning")
 
                     output_text = ""
@@ -90,8 +100,8 @@ with tab1:
                                     print("trace : ", trace)
                                     answer = json.loads(
                                         trace.get('observation', {}).get('actionGroupInvocationOutput', {}).get('text'))
-                                    #trace_container.markdown(f"**Answer**")
-                                    #trace_container.write(f"{answer}")
+                                    # trace_container.markdown(f"**Answer**")
+                                    # trace_container.write(f"{answer}")
 
                                     function_name = ""
 
