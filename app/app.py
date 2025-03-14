@@ -67,6 +67,7 @@ with tab1:
         with st.spinner("generating reasoning"):
             try:
                 sessionId = st.session_state.session_id or str(uuid.uuid4())
+                print(f"session id : {sessionId}")
                 response = bedrock_service.chat_with_aws_expert(user_question=user_question, session_id=sessionId)
 
                 if response:
